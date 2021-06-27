@@ -2,12 +2,15 @@ import {
   ConnectionInitMessage,
   SubscribeMessage,
   CompleteMessage,
+  ConnectionAckMessage,
+  NextMessage,
 } from 'graphql-ws';
 import { DataMapper } from '@aws/dynamodb-data-mapper';
-import { APIGatewayEvent } from 'aws-lambda';
+import { APIGatewayEvent, APIGatewayEventRequestContext } from 'aws-lambda';
 import { GraphQLSchema } from 'graphql';
 import { DynamoDB } from 'aws-sdk';
 import { Subscription, Connection } from './model';
+import { ErrorMessage } from 'aws-sdk/clients/cloudwatchevents';
 
 export type ServerArgs = {
   schema: GraphQLSchema;
@@ -30,6 +33,18 @@ export type ServerArgs = {
     message: CompleteMessage;
   }) => MaybePromise<void>;
   onError?: (error: any, context: any) => void;
+  onSendMessage?: (
+    event: {
+      message:
+        | ConnectionAckMessage
+        | NextMessage
+        | CompleteMessage
+        | ErrorMessage;
+    } & Pick<
+      APIGatewayEventRequestContext,
+      'connectionId' | 'domainName' | 'stage'
+    >
+  ) => any;
 };
 
 type MaybePromise<T> = T | Promise<T>;

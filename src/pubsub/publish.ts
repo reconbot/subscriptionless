@@ -17,7 +17,7 @@ type PubSubEvent = {
 export const publish = (c: ServerClosure) => async (event: PubSubEvent) => {
   const subscriptions = await getFilteredSubs(c)(event);
   const iters = subscriptions.map(async (sub) => {
-    const result = execute(
+    const result = await execute(
       c.schema,
       parse(sub.subscription.query),
       event,
@@ -27,12 +27,14 @@ export const publish = (c: ServerClosure) => async (event: PubSubEvent) => {
       undefined
     );
 
-    await sendMessage({
+    const sendFunction = c.onSendMessage ?? sendMessage;
+
+    await sendFunction({
       ...sub.requestContext,
       message: {
         id: sub.id,
         type: MessageType.Next,
-        payload: await result,
+        payload: result,
       },
     });
   });
