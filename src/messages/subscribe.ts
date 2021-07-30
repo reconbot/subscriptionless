@@ -109,12 +109,10 @@ export const subscribe: MessageHandler<SubscribeMessage> =
         await onSubscribe(root, args, context, info);
       }
 
-      const topicDefinitions = (field.subscribe as SubscribeHandler)(
-        root,
-        args,
-        context,
-        info
-      ).definitions; // Access subscribe instance
+      const { definitions: topicDefinitions } = await (
+        field.subscribe as SubscribeHandler
+      )(root, args, context, info); // Access subscribe instance
+
       await Promise.all(
         topicDefinitions.map(async ({ topic, filter }) => {
           const subscription = assign(new c.model.Subscription(), {

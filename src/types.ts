@@ -96,7 +96,9 @@ export type SubscriptionDefinition = {
   filter?: object | (() => void);
 };
 
-export type SubscribeHandler = (...args: any[]) => SubscribePsuedoIterable;
+export type SubscribeHandler = (
+  ...args: any[]
+) => SubscribePsuedoIterable | Promise<SubscribePsuedoIterable>;
 
 export type SubscribePsuedoIterable = {
   (): void;
